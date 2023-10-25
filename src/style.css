@@ -81,3 +81,17 @@ button {
     background-color: #f9f9f9;
   }
 }
+
+
+.success-form-quiz{
+  margin-top: 10px;
+
+  font-size: 30px;
+  font-weight: 500;
+  line-height:36px;
+  text-align: center;
+}
+#error-phone,
+#error-email{
+  text-align: left;
+}

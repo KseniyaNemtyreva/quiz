@@ -9,7 +9,6 @@ axios({
   url: 'http://orehovo672.tw1.ru/ajax/Creat_proekt.php',
 }).then(function(response){
   questions.value = response.data;
-  console.log(response.data);
 })
 
 const result = ref([])
@@ -32,6 +31,13 @@ const getCurrentQuestion = computed(() => {
 const SetAnswer = (e) => {
   questions.value[currentQuestion.value].selected = e.target.value
   e.target.value = null
+}
+
+const clearPhoneError = (e) =>{
+  document.querySelector('#error-phone').innerHTML = '';
+}
+const clearEmailError = (e) =>{
+  document.querySelector('#error-email').innerHTML = '';
 }
 
 const NextQuestion = () => {
@@ -139,11 +145,46 @@ const SendForm = (e)  => {
   accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
   datatype: 'json',
   }).then(function(response){
-    console.log(response.data);
+    let calcProjectForm= document.querySelector('.calculate-project__type-build');
+
+    if(response.data['code'] == 3){
+      document.querySelector('#error-phone').innerHTML = '<span style="text-align:left;color:var(--red);font-size:18px;font-weight:600;">Вы не указали телефон</span>';
+    }
+    if(response.data['code'] == 2){
+      document.querySelector('#error-email').innerHTML = '<span style="text-align:left;color:var(--red);font-size:18px;font-weight:600;">Вы не указали почту</span>';
+    }
+    if(response.data['code'] == 1){
+      document.querySelector('#error-phone').innerHTML = '<span style="text-align:left;color:var(--red);font-size:20px;font-weight:700;">Произошла неизвестная ошибка</span>';
+    }
+    if(response.data['code'] == 0){
+      calcProjectForm.innerHTML = `
+      <div>
+        <div>
+          <svg width="132" height="132" viewBox="0 0 132 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_1432_19613)">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M66 0C29.5969 0 0 29.5969 0 66C0 102.403 29.5969 132 66 132C102.403 132 132 102.403 132 66C132 29.5969 102.403 0 66 0Z" fill="#4BAE4F"/>
+          <path d="M53.2898 96.1899C44.8594 87.7594 36.4805 79.2516 28.0242 70.8211C27.0961 69.893 27.0961 68.3461 28.0242 67.418L37.7438 57.6985C38.6719 56.7704 40.2188 56.7704 41.1469 57.6985L55.043 71.5946L90.7758 35.836C91.7297 34.9079 93.2508 34.9079 94.2047 35.836L103.95 45.5813C104.904 46.5352 104.904 48.0563 103.95 48.9844L56.693 96.1899C55.7648 97.1438 54.2438 97.1438 53.2898 96.1899Z" fill="white"/>
+          </g>
+          <defs>
+          <clipPath id="clip0_1432_19613">
+          <rect width="132" height="132" fill="white"/>
+          </clipPath>
+          </defs>
+          </svg>
+        </div>
+        <div class="success-form-quiz">
+          <span>Спасибо! Ваша заявка отправлена</span>
+        </div>
+      </div>
+      
+      `
+    }
   })
 
 }
 </script>
+
+
 
 <template>
   <div class="calculate-project__type-build" v-if="!quizCompleted">
@@ -186,8 +227,10 @@ const SendForm = (e)  => {
           <div class="quiz-form__form-block">
             <div class="quiz-form__form-block-inputs">
               <input v-model="name" type="text" class="quiz-form__form-name" id="quiz-form__form-name" name="name" placeholder="Ваше имя">
-              <input v-model="phone" v-maska data-maska="+7(###)###-##-##" type="text" class="quiz-form__form-phone" id="quiz-form__form-phone" name="phone" required placeholder="Телефон для связи*">
-              <input v-model="email" type="email" class="quiz-form__form-email" id="quiz-form__form-email" name="email" required placeholder="E-mail*">
+              <input v-model="phone" type="phone" @change="clearPhoneError" v-maska data-maska="+7(###)###-##-##" class="quiz-form__form-phone" id="quiz-form__form-phone" name="phone" required placeholder="Телефон для связи*">
+              <div id="error-phone"></div>
+              <input v-model="email" type="email" @change="clearEmailError" class="quiz-form__form-email" id="quiz-form__form-email" name="email" required placeholder="E-mail*">
+              <div id="error-email"></div>
             </div>
           </div>
           
@@ -208,9 +251,10 @@ const SendForm = (e)  => {
             <span>Даю согласие на <a href="">обработку персональных данных</a></span>
           </div>
         </div>
-          <button class="type-build__next" @click="SendForm">
+          <button class="type-build__next btn-red" @click="SendForm">
             Отправить заявку
           </button>
+          <div id="error-quiz"></div>
       </form>
     </div>
 
