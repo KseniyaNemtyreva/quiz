@@ -148,13 +148,13 @@ const SendForm = (e)  => {
     let calcProjectForm= document.querySelector('.calculate-project__type-build');
 
     if(response.data['code'] == 3){
-      document.querySelector('#error-phone').innerHTML = '<span style="text-align:left;color:var(--red);font-size:18px;font-weight:600;">Вы не указали телефон</span>';
+      document.querySelector('#error-phone').innerHTML = '<span style="text-align:left;color:var(--red);font-size:14px;font-weight:600;">Вы не указали телефон!</span>';
     }
     if(response.data['code'] == 2){
-      document.querySelector('#error-email').innerHTML = '<span style="text-align:left;color:var(--red);font-size:18px;font-weight:600;">Вы не указали почту</span>';
+      document.querySelector('#error-email').innerHTML = '<span style="text-align:left;color:var(--red);font-size:14px;font-weight:600;">Вы не указали почту!</span>';
     }
     if(response.data['code'] == 1){
-      document.querySelector('#error-phone').innerHTML = '<span style="text-align:left;color:var(--red);font-size:20px;font-weight:700;">Произошла неизвестная ошибка</span>';
+      document.querySelector('#error-quiz').innerHTML = '<span style="text-align:left;color:var(--red);font-size:20px;font-weight:700;">Произошла неизвестная ошибка!</span>';
     }
     if(response.data['code'] == 0){
       calcProjectForm.innerHTML = `
@@ -204,10 +204,10 @@ const SendForm = (e)  => {
     </div>
 
     <div class="type-build__buttons">
-      <button class="type-build__back" @click="PrevQuestion">
+      <button class="type-build__back btn-white" @click="PrevQuestion">
         Назад
       </button>
-      <button class="type-build__next" @click="NextQuestion" :disabled="!getCurrentQuestion.selected">
+      <button class="type-build__next btn-red" @click="NextQuestion" :disabled="!getCurrentQuestion.selected">
         Далее
       </button>
     </div>
@@ -227,10 +227,10 @@ const SendForm = (e)  => {
           <div class="quiz-form__form-block">
             <div class="quiz-form__form-block-inputs">
               <input v-model="name" type="text" class="quiz-form__form-name" id="quiz-form__form-name" name="name" placeholder="Ваше имя">
-              <input v-model="phone" type="phone" @change="clearPhoneError" v-maska data-maska="+7(###)###-##-##" class="quiz-form__form-phone" id="quiz-form__form-phone" name="phone" required placeholder="Телефон для связи*">
               <div id="error-phone"></div>
-              <input v-model="email" type="email" @change="clearEmailError" class="quiz-form__form-email" id="quiz-form__form-email" name="email" required placeholder="E-mail*">
+              <input v-model="phone" type="phone" @change="clearPhoneError" v-maska data-maska="+7(###)###-##-##" class="quiz-form__form-phone" id="quiz-form__form-phone" name="phone" required placeholder="Телефон для связи*">
               <div id="error-email"></div>
+              <input v-model="email" type="email" @change="clearEmailError" class="quiz-form__form-email" id="quiz-form__form-email" name="email" required placeholder="E-mail*">
             </div>
           </div>
           

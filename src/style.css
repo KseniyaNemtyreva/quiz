@@ -95,3 +95,10 @@ button {
 #error-email{
   text-align: left;
 }
+
+.type-build__blocks{
+  min-height: 355px;
+}
+h2.question{
+  min-height: 75px;
+}
