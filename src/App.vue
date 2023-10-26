@@ -158,7 +158,7 @@ const SendForm = (e)  => {
     }
     if(response.data['code'] == 0){
       calcProjectForm.innerHTML = `
-      <div>
+      <div class="success-form__quiz-block">
         <div>
           <svg width="132" height="132" viewBox="0 0 132 132" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g clip-path="url(#clip0_1432_19613)">
