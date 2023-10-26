@@ -102,3 +102,6 @@ button {
 h2.question{
   min-height: 75px;
 }
+.calculate-project__type-build__result{
+  padding-top: 60px;
+}

@@ -214,7 +214,7 @@ const SendForm = (e)  => {
   </div>
 
   <div class="calculate-project__type-build" v-else>
-    <h2>Результат:</h2>
+    <h2 class="calculate-project__type-build__result">Результат:</h2>
     <div class="calculate-project__result">
       <p  v-for="(resultData, resultIndex) in result" :key="resultIndex">
         {{ resultIndex+1 }}. {{ resultData.question }} : {{ resultData.text }}
