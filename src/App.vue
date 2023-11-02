@@ -1,7 +1,11 @@
 <script setup>
 import axios from 'axios';
-import { ref, computed } from 'vue';
-import { vMaska } from "maska"
+import { ref, computed, VueElement } from 'vue';
+import { vMaska } from "maska";
+
+import { RecaptchaV2, useRecaptcha } from "vue3-recaptcha-v2";
+const { handleReset } = useRecaptcha();
+
 
 const questions = ref([]);
 axios({
@@ -10,6 +14,10 @@ axios({
 }).then(function(response){
   questions.value = response.data;
 })
+
+
+
+
 
 const result = ref([])
 
@@ -125,6 +133,11 @@ const onFileDrop = (event) =>{
   }
 }
 
+let widgetIdGlob;
+const handleWidgetId = (widgetId) => {
+  console.log("Widget ID: ", widgetId);
+  widgetIdGlob = widgetId;
+};
 
 const SendForm = (e)  => {
   e.preventDefault(); 
@@ -137,7 +150,7 @@ const SendForm = (e)  => {
     resultString += element.question + ': ' + element.text + '</br>'
   });
   data.append('quiz', resultString);
-
+ 
   axios({
   method: 'post',
   url: 'http://orehovo672.tw1.ru/ajax/Send-quiz-form.php',
@@ -146,14 +159,16 @@ const SendForm = (e)  => {
   datatype: 'json',
   }).then(function(response){
     let calcProjectForm= document.querySelector('.calculate-project__type-build');
+    
+    handleReset(widgetIdGlob);
 
-    if(response.data['code'] == 3){
+    if(response.data['code'] == 4){
       document.querySelector('#error-phone').innerHTML = '<span style="text-align:left;color:var(--red);font-size:14px;font-weight:600;">Вы не указали телефон!</span>';
     }
-    if(response.data['code'] == 2){
+    if(response.data['code'] == 3){
       document.querySelector('#error-email').innerHTML = '<span style="text-align:left;color:var(--red);font-size:14px;font-weight:600;">Вы не указали почту!</span>';
     }
-    if(response.data['code'] == 1){
+    if(response.data['code'] == 2){
       document.querySelector('#error-quiz').innerHTML = '<span style="text-align:left;color:var(--red);font-size:20px;font-weight:700;">Произошла неизвестная ошибка!</span>';
     }
     if(response.data['code'] == 0){
@@ -182,8 +197,8 @@ const SendForm = (e)  => {
   })
 
 }
-</script>
 
+</script>
 
 
 <template>
@@ -243,8 +258,10 @@ const SendForm = (e)  => {
               
             </div>
           </div>
-          
-          <div class="g-recaptcha" data-callback='captchaSubmit4' data-sitekey="6Lf-sVQoAAAAAJ0Pnxkv7nSbVJgyKMgzy8x6pD3C"></div>
+          <div class="custom-cuptha">
+            <RecaptchaV2 @widget-id="handleWidgetId"/>
+          </div>
+          <!-- <div class="g-recaptcha" data-callback='captchaSubmit4' data-sitekey="6Lf-sVQoAAAAAJ0Pnxkv7nSbVJgyKMgzy8x6pD3C"></div> -->
           <div class="text-danger" id="recaptchaError"></div>
           <div class="quiz-form__form-approval">
             <input type="checkbox" id="switch4" checked required /><label for="switch4">Toggle</label>
