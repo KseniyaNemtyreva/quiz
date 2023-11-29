@@ -176,9 +176,8 @@ const onFileChange = (e) =>{
         document.querySelector('#quiz-file-preview').innerHTML = ""
       })
 
-      let observ = new MutationObserver(()=>{        
-        let imagePrevSize = 0
-        console.log(imagePrevSize)
+      let observ = new MutationObserver(()=>{      
+        let imagePrevSize = 0 // все проблемы оказываются из-за того что currFiles.length не считывает изменение количества
         for (let i = 0; i < currFiles.length; i++) {
           imagePrevSize += currFiles[i].size
           console.log(imagePrevSize)
@@ -186,12 +185,11 @@ const onFileChange = (e) =>{
         i=0;
         while(imagePrevSize>900)
         {imagePrevSize/=1024;i++;}
-        var exactSize1 = (Math.round(imagePrevSize*100)/100)+' '+fSExt1[i];
+        var exactSize = (Math.round(imagePrevSize*100)/100)+' '+fSExt1[i];
         imageCount.innerHTML = currFiles.length + " файла"	
-        imageSize.innerHTML = exactSize1
-             
+        imageSize.innerHTML = exactSize           
       })
-      observ.observe((document.querySelector('#quiz-file-preview')),{
+      observ.observe(imagePreviewDiv,{
         childList: true,
         subtree: true
       })
@@ -307,8 +305,9 @@ const onFileDrop = (event) =>{
 
       let obs = new MutationObserver(()=>{    
         let imagePrevSize = 0
+        // А эта хуйня uploadInput.files.length через раз считывает изменения
         for (let i = 0; i < uploadInput.files.length; i++) {	
-          imagePrevSize += uploadInput.files[i].size
+          imagePrevSize += uploadInput.files[i].size          
         }
         i=0;
         while(imagePrevSize>900)
