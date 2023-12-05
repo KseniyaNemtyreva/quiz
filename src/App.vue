@@ -26,6 +26,9 @@ const name = ref('')
 const phone = ref('')
 const email = ref('')
 
+const files = ref([])
+const inputFile = ref(null)
+
 const quizCompleted = ref(false)
 const currentQuestion = ref(0)
 
@@ -94,234 +97,90 @@ const PrevQuestion = () => {
   }
 }
 
-const onFileChange = (e) =>{
-  let imageCount = document.querySelector("#quiz-file-count")
-  let imageSize = document.querySelector("#quiz-file-size")
-  let imageAllRemove = document.querySelector("#quiz-file-remove-all")
+const onChange = (event) => {
+  console.log('onChange', event)
+  
+  if (event.target.files.length > 0) {
+    console.log('here')
+    let validFiles = new DataTransfer();
 
-  imageCount.innerHTML = "";
-  imageSize.innerHTML = "";
-  imageAllRemove.innerHTML = "";
-
-
-  document.querySelector('#quiz-file-preview').innerHTML ="";
-  const currFiles = e.target.files;
-  if(currFiles.length > 0){
-    if(currFiles.length > 10){
-        alert("Вы не можете загружать больше 10 файлов");
-    }else{
-      let imagePreviewDiv = document.querySelector('#quiz-file-preview');
-      let imagePrevSize = 0
-      for (let i = 0; i < currFiles.length; i++) {
-        let div = document.createElement('div');
-        div.dataset.id = i;
-        div.classList.add('quiz-file__preview-img'); 
-        let src = URL.createObjectURL(currFiles[i])
-        let img = document.createElement('img');
-        img.src = src;
-        img.style.display = 'block';
-        let close = document.createElement('button'); 
-        close.addEventListener('click',()=>{
-          close.parentElement.remove();
-
-          let files = e.target.files;
-          let validFiles = new DataTransfer();
-
-          let j = 0;
-          for (const file of files) {
-            if(div.dataset.id != j){
-              validFiles.items.add(file);
-            }
-            j++;
-          }
-          e.target.files.value = '';
-          e.target.files = validFiles.files;
-          
-        })
-        close.classList.add('quiz-file__preview-close'); 
-        close.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <g clip-path="url(#clip0_319_6585)">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M7 0C10.8654 0 14 3.13462 14 7C14 10.8654 10.8654 14 7 14C3.13462 14 0 10.8654 0 7C0 3.13462 3.13462 0 7 0ZM3.46197 9.53372L5.99569 7L3.46197 4.46628C3.31662 4.32087 3.31662 4.0837 3.46197 3.93835L3.93835 3.46197C4.0837 3.31662 4.32087 3.31662 4.46628 3.46197L7 5.99569L9.53372 3.46197C9.67913 3.31662 9.9163 3.31662 10.0616 3.46197L10.538 3.93835C10.6834 4.0837 10.6834 4.32087 10.538 4.46628L8.00431 7L10.538 9.53372C10.6834 9.67913 10.6834 9.9163 10.538 10.0616L10.0616 10.538C9.9163 10.6834 9.67913 10.6834 9.53372 10.538L7 8.00431L4.46628 10.538C4.32087 10.6834 4.0837 10.6834 3.93835 10.538L3.46197 10.0616C3.31662 9.9163 3.31662 9.67913 3.46197 9.53372Z" fill="#F5F5F2"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_319_6585">
-              <rect width="14" height="14" fill="white"/>
-            </clipPath>
-          </defs>
-        </svg>`;
-        div.append(img)
-        div.append(close)
-        imagePreviewDiv.append(div);
-        imagePrevSize += currFiles[i].size
-      }
-      var fSExt1 = new Array('Байт', 'КБ', 'МБ', 'ГБ'),
-      i=0;
-      while(imagePrevSize>900)
-      {imagePrevSize/=1024;i++;}
-      var exactSize1 = (Math.round(imagePrevSize*100)/100)+' '+fSExt1[i];
-
-      let imageCount = document.querySelector("#quiz-file-count")
-      let imageSize = document.querySelector("#quiz-file-size")
-      let imageAllRemove = document.querySelector("#quiz-file-remove-all")
-      imageCount.innerHTML = currFiles.length + " файла"
-      imageSize.innerHTML = exactSize1
-      imageAllRemove.innerHTML = "Удалить все"
-      imageAllRemove.type = "button" 
-      imageAllRemove.addEventListener('click',()=>{
-        Array.from(currFiles).length = 0;
-        imageSize.innerHTML = ""
-        imageCount.innerHTML = ""
-        imageAllRemove.innerHTML =""
-        document.querySelector('#quiz-file-preview').innerHTML = ""
-      })
-
-      let observ = new MutationObserver(()=>{      
-        let imagePrevSize = 0 // все проблемы оказываются из-за того что currFiles.length не считывает изменение количества
-        for (let i = 0; i < currFiles.length; i++) {
-          imagePrevSize += currFiles[i].size
-          console.log(imagePrevSize)
-        }
-        i=0;
-        while(imagePrevSize>900)
-        {imagePrevSize/=1024;i++;}
-        var exactSize = (Math.round(imagePrevSize*100)/100)+' '+fSExt1[i];
-        imageCount.innerHTML = currFiles.length + " файла"	
-        imageSize.innerHTML = exactSize           
-      })
-      observ.observe(imagePreviewDiv,{
-        childList: true,
-        subtree: true
-      })
+    if (event.target.files.length > 10) {
+      alert("Вы не можете загружать больше 10 файлов");
+      inputFile.files = validFiles.files; // поставили пустое значение
+      return;
     }
+    
+    files.value = [];
+    files.value.push(...event.target.files);
+    for (const child of document.querySelector('.quiz-form__form-file-block').children) {
+      child.style.pointerEvents = "auto";
+    }
+
+    // inputFile.files = event.target.files
+  } else {
+    console.log('fuck')
   }
+}
+
+const generateThumbnail = (file) => {
+  console.log('generateImg')
+  let fileSrc = URL.createObjectURL(file);
+  setTimeout(() => {
+    URL.revokeObjectURL(fileSrc);
+  }, 1000);
+  return fileSrc;
+}
+
+function remove(i) {
+  files.value.splice(i, 1);
+  console.log('prev', inputFile.files)
+  inputFile.files = files.value;
+  console.log('after', inputFile.files)
+}
+
+const removeAll = () => {
+  files.value.length = 0
+}
+
+const dragover = (e) => {
+  e.preventDefault();
+  DropActive.value = true;
   for (const child of document.querySelector('.quiz-form__form-file-block').children) {
     child.style.pointerEvents = "auto";
   }
 }
 
-const onFileDropEnter = ()=>{
-  console.log('dropenter');
+const dragleave = () => {
+  DropActive.value = false;
+  for (const child of document.querySelector('.quiz-form__form-file-block').children) {
+    child.style.pointerEvents = "auto";
+  }
+}
+
+const dragenter = () => {
   DropActive.value = true;
 
-  
   for (const child of document.querySelector('.quiz-form__form-file-block').children) {
     child.style.pointerEvents = "none";
   }
 }
 
-const onFileDropLeave = ()=>{
-  console.log('dropleave');
-  DropActive.value = false;
+const drop = (e) => {
+  e.preventDefault();
+  // 
+
+
+
+  const customEvent  = { target: e.dataTransfer }
+  console.log(e)
   for (const child of document.querySelector('.quiz-form__form-file-block').children) {
     child.style.pointerEvents = "auto";
   }
-}
-
-const onFileDrop = (event) =>{
   DropActive.value = false;
-  event.preventDefault();
-  const file = event.dataTransfer?.files[0];
-  if (!file) {
-    return
-  }
-  for (const child of document.querySelector('.quiz-form__form-file-block').children) {
-    child.style.pointerEvents = "auto";
-  }
-  let uploadInput = event.target.querySelector('#quiz-form__form-file');
-  uploadInput.files = event.dataTransfer.files;
-
-  event.target.querySelector('#quiz-file-preview').innerHTML = "";
-
-  if(uploadInput.files.length > 0){
-    if(uploadInput.files.length > 10){
-        alert("Вы не можете загружать больше 10 файлов");
-    }else{
-      let imagePreviewDiv = event.target.querySelector('#quiz-file-preview')
-      let imagePrevSize = 0
-      for (let i = 0; i < uploadInput.files.length; i++) {
-        let div = document.createElement('div');
-        div.dataset.id = i;
-        div.classList.add('quiz-file__preview-img'); 
-        let src = URL.createObjectURL(uploadInput.files[i])
-        let img = document.createElement('img');                       
-        img.src = src;
-        img.style.display = 'block';
-        let close = document.createElement('button');
-        close.addEventListener('click',()=>{
-            close.parentElement.remove();
-
-            let files = event.target.querySelector('#quiz-form__form-file').files;
-            let validFiles = new DataTransfer();
-
-            let j = 0;
-            for (const file of files) {
-              if(div.dataset.id != j){
-                validFiles.items.add(file);
-              }
-              j++;
-            }
-            event.target.querySelector('#quiz-form__form-file').files.value = '';
-            event.target.querySelector('#quiz-form__form-file').files = validFiles.files;
-            
-          })
-        close.classList.add('quiz-file__preview-close'); 
-        close.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <g clip-path="url(#clip0_319_6585)">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M7 0C10.8654 0 14 3.13462 14 7C14 10.8654 10.8654 14 7 14C3.13462 14 0 10.8654 0 7C0 3.13462 3.13462 0 7 0ZM3.46197 9.53372L5.99569 7L3.46197 4.46628C3.31662 4.32087 3.31662 4.0837 3.46197 3.93835L3.93835 3.46197C4.0837 3.31662 4.32087 3.31662 4.46628 3.46197L7 5.99569L9.53372 3.46197C9.67913 3.31662 9.9163 3.31662 10.0616 3.46197L10.538 3.93835C10.6834 4.0837 10.6834 4.32087 10.538 4.46628L8.00431 7L10.538 9.53372C10.6834 9.67913 10.6834 9.9163 10.538 10.0616L10.0616 10.538C9.9163 10.6834 9.67913 10.6834 9.53372 10.538L7 8.00431L4.46628 10.538C4.32087 10.6834 4.0837 10.6834 3.93835 10.538L3.46197 10.0616C3.31662 9.9163 3.31662 9.67913 3.46197 9.53372Z" fill="#F5F5F2"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_319_6585">
-              <rect width="14" height="14" fill="white"/>
-            </clipPath>
-          </defs>
-        </svg>`;
-        div.append(img)
-        div.append(close)
-        imagePreviewDiv.append(div);
-        imagePrevSize += uploadInput.files[i].size
-      }
-      var fSExt = new Array('Байт', 'КБ', 'МБ', 'ГБ'),
-      i=0;
-      while(imagePrevSize>900)
-      {imagePrevSize/=1024;i++;}
-      var exactSize = (Math.round(imagePrevSize*100)/100)+' '+fSExt[i];
-
-      let imageCount = document.querySelector("#quiz-file-count")
-      let imageSize = document.querySelector("#quiz-file-size")
-      let imageAllRemove = document.querySelector("#quiz-file-remove-all")        
-      imageCount.innerHTML = uploadInput.files.length + " файла"
-      imageSize.innerHTML = exactSize
-      imageAllRemove.innerHTML = "Удалить все"
-      imageAllRemove.type = "button" 
-      imageAllRemove.addEventListener('click',()=>{
-        Array.from(uploadInput).length = 0;
-        imageSize.innerHTML = ""
-        imageCount.innerHTML = ""
-        imageAllRemove.innerHTML =""
-        document.querySelector('#quiz-file-preview').innerHTML = ""
-      })
-
-      let obs = new MutationObserver(()=>{    
-        let imagePrevSize = 0
-        // А эта хуйня uploadInput.files.length через раз считывает изменения
-        for (let i = 0; i < uploadInput.files.length; i++) {	
-          imagePrevSize += uploadInput.files[i].size          
-        }
-        i=0;
-        while(imagePrevSize>900)
-        {imagePrevSize/=1024;i++;}
-        var exactSize = (Math.round(imagePrevSize*100)/100)+' '+fSExt[i];
-        imageCount.innerHTML = uploadInput.files.length + " файла"	
-        imageSize.innerHTML = exactSize
-      })
-      obs.observe((imagePreviewDiv),{
-        childList: true
-      })
-    }
-  }
+  console.log('drop', customEvent)
+  onChange(customEvent);
 }
+
 
 let widgetIdGlob;
 const handleWidgetId = (widgetId) => {
@@ -439,16 +298,31 @@ const SendForm = (e)  => {
           <a class="quiz-url" :href="catalogURl">
             Посмотреть похожие проекты
           </a>        
-          <div class="quiz-form__form-file-block" v-bind:class="{_active: DropActive}" id="file-enter-zone" @drop="onFileDrop" @dragenter="onFileDropEnter" @dragleave="onFileDropLeave"  @dragover.prevent @dragenter.prevent>
+          <div class="quiz-form__form-file-block" v-bind:class="{_active: DropActive}" id="file-enter-zone" @dragover="dragover" @dragleave="dragleave" @drop="drop" @dragenter="dragenter" @dragover.prevent @dragenter.prevent>
             <div class="quiz-file-preview-info">
-              <span id="quiz-file-count"></span>
-              <span id="quiz-file-size"></span>
-              <button type="button" id="quiz-file-remove-all"></button>
+              <span id="quiz-file-count" v-if="files.length"></span>
+              <span id="quiz-file-size" v-if="files.length">{{ files.length }} файла</span>
+              <button @click="removeAll" type="button" id="quiz-file-remove-all" v-if="files.length"> Удалить все</button>
             </div>
-            <div class="preview" id="quiz-file-preview">              
+            <div class="preview" id="quiz-file-preview">                    
+              <div v-for="(file, index) in files" :key="file.name" :data-id="index" class="quiz-file__preview-img" >
+                <img :src="generateThumbnail(file)" style="display: block;">
+                <button class="quiz-file__preview-close" type="button" @click="remove(files.indexOf(file))">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <g clip-path="url(#clip0_319_6585)">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M7 0C10.8654 0 14 3.13462 14 7C14 10.8654 10.8654 14 7 14C3.13462 14 0 10.8654 0 7C0 3.13462 3.13462 0 7 0ZM3.46197 9.53372L5.99569 7L3.46197 4.46628C3.31662 4.32087 3.31662 4.0837 3.46197 3.93835L3.93835 3.46197C4.0837 3.31662 4.32087 3.31662 4.46628 3.46197L7 5.99569L9.53372 3.46197C9.67913 3.31662 9.9163 3.31662 10.0616 3.46197L10.538 3.93835C10.6834 4.0837 10.6834 4.32087 10.538 4.46628L8.00431 7L10.538 9.53372C10.6834 9.67913 10.6834 9.9163 10.538 10.0616L10.0616 10.538C9.9163 10.6834 9.67913 10.6834 9.53372 10.538L7 8.00431L4.46628 10.538C4.32087 10.6834 4.0837 10.6834 3.93835 10.538L3.46197 10.0616C3.31662 9.9163 3.31662 9.67913 3.46197 9.53372Z" fill="#F5F5F2"></path>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_319_6585">
+                        <rect width="14" height="14" fill="white"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </button>
+              </div>
             </div>
             <label for="quiz-form__form-file" class="btn-white">Добавить фото
-              <input type="file" @change="onFileChange" multiple style="visibility:hidden;position: absolute;" class="quiz-form__form-file" id="quiz-form__form-file" name="file[]" accept="image/*" aria-describedby="hint">
+              <input type="file" @change="onChange" multiple class="quiz-form__form-file" id="quiz-form__form-file" name="file" accept="image/*" aria-describedby="hint" ref="inputFile">
             </label>            
           </div>
           <div class="custom-cuptha">
@@ -983,6 +857,10 @@ form#quiz {
   color: #FFFFFF;
   padding: 10px 20px 12px 20px;
 }
+.quiz-form__form-file{
+  visibility:hidden;
+  position: absolute;
+}
 .quiz-form__form-file-block {
   flex-direction: column;
   padding: 50px 20px;
@@ -1047,7 +925,7 @@ form#quiz {
 .quiz-form__form-file-block .preview{
   position: relative;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   left: 0;
   top: 0px;
@@ -1090,6 +968,7 @@ h2.question{
 }
 
 .quiz-file__preview-close {
+  background: unset;
   position: absolute;
   top: 3px;
   right: 2px;
@@ -1123,6 +1002,7 @@ span#quiz-file-size{
 }
 button#quiz-file-remove-all{
   color: #7B7A79;
+  background: unset;
   font-family: Montserrat;
   font-size: 14px;
   font-style: normal;
@@ -1133,5 +1013,15 @@ button#quiz-file-remove-all{
 .quiz-form__form-file-block._active{
   background-color: #bd3a4826;
   transition: all 0.2s ease-in-out;
+}
+.success-form__quiz-url:hover,
+.quiz-ur:hover{
+  text-decoration: underline;
+}
+
+.quiz-url{
+  color: #BD3A48;
+  margin: 10px 0;
+  text-align: center;
 }
 </style> 
