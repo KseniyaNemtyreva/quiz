@@ -7,18 +7,13 @@ import { RecaptchaV2, useRecaptcha } from "vue3-recaptcha-v2";
 const { handleReset } = useRecaptcha();
 
 
-// const questions = ref([]);
-// axios({
-//   method: 'get',
-//   url: '/ajax/Creat_proekt.php',
-// }).then(function(response){
-//   questions.value = response.data;
-// })
-
-const questions = ref([
-  {"question":"\u0421\u043a\u043e\u043b\u044c\u043a\u043e \u044d\u0442\u0430\u0436\u0435\u0439 \u0431\u0443\u0434\u0435\u0442?","options":[{"text":"\u041e\u0434\u0438\u043d","image":"\/upload\/iblock\/b6f\/nwuqyvrhejd6sqdf0yvazwdo786xiasu.jpeg"},{"text":"\u0414\u0432\u0430","image":"\/upload\/iblock\/479\/k5d12vkldkqwby90q4l03z4ux7ihk21q.jpeg"},{"text":"\u0422\u0440\u0438","image":"\/upload\/iblock\/717\/3znx8igzqqim0ghse1pg1xb084om015k.jpeg"},{"text":"\u0415\u0449\u0451 \u043d\u0435 \u0440\u0435\u0448\u0438\u043b","image":"\/upload\/iblock\/809\/2e1kocbth91667mkwiyuot5mahkz5bxd.png"}],"selected":null},
-  {"question":"\u0418\u0437 \u043a\u0430\u043a\u043e\u0433\u043e \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u0430 \u043f\u043b\u0430\u043d\u0438\u0440\u0443\u0435\u0442\u0435 \u0441\u0442\u0440\u043e\u0438\u0442\u044c \u0434\u043e\u043c?","options":[{"text":"\u041a\u0430\u0440\u0430\u043a\u0430\u0441\u043d\u043e-\u0449\u0438\u0442\u043e\u0432\u043e\u0439","image":"\/upload\/iblock\/b2a\/5qg6hgs6don3tvz19w30pvkbiiva78ya.jpeg"},{"text":"\u0411\u0440\u0443\u0441\u043e\u0432\u044b\u0439","image":"\/upload\/iblock\/db8\/hrczeyqkdkbpencyhzk4dpghm92usvkm.jpeg"},{"text":"\u0411\u043b\u043e\u0447\u043d\u044b\u0439","image":"\/upload\/iblock\/002\/jrbbcne65xipxtz2aguvade17cqitzbm.jpeg"},{"text":"\u0411\u043b\u043e\u043a-\u043a\u0438\u0440\u043f\u0438\u0447","image":"\/upload\/iblock\/1cf\/vzq6mia5bctsas6jlghw1fykn5dbfq9y.jpeg"},{"text":"\u0418\u043d\u043d\u043e\u0431\u043b\u043e\u043a","image":"\/upload\/iblock\/71f\/0854g8jhtyesss12ak6qisex6ww59dvd.jpeg"},{"text":"\u0415\u0449\u0435 \u043d\u0435 \u0440\u0435\u0448\u0438\u043b","image":"\/upload\/iblock\/809\/2e1kocbth91667mkwiyuot5mahkz5bxd.png"}],"selected":null},
-])
+const questions = ref([]);
+axios({
+  method: 'get',
+  url: '/ajax/Creat_proekt.php',
+}).then(function(response){
+  questions.value = response.data;
+})
 
 const result = ref([])
 
@@ -26,8 +21,8 @@ const name = ref('')
 const phone = ref('')
 const email = ref('')
 
-const files = ref([])
-const inputFile = ref(null)
+let arFiles = ref([])
+let size = ref('')
 
 const quizCompleted = ref(false)
 const currentQuestion = ref(0)
@@ -97,29 +92,66 @@ const PrevQuestion = () => {
   }
 }
 
+
 const onChange = (event) => {
-  console.log('onChange', event)
-  
-  if (event.target.files.length > 0) {
-    console.log('here')
-    let validFiles = new DataTransfer();
+  // приходится к input[type="file"] инициировать js, т.к. v-bind/ref не дают впоследствии его изменять
+  let uploadInput = document.querySelector('#quiz-form__form-file')
+  let validFiles = new DataTransfer();
+  let validSize = 0;
 
-    if (event.target.files.length > 10) {
-      alert("Вы не можете загружать больше 10 файлов");
-      inputFile.files = validFiles.files; // поставили пустое значение
-      return;
-    }
-    
-    files.value = [];
-    files.value.push(...event.target.files);
-    for (const child of document.querySelector('.quiz-form__form-file-block').children) {
-      child.style.pointerEvents = "auto";
-    }
+  // starts when drop
+  if (event.target == null) {
+    if (event.files.length > 0) {
+      if (event.files.length > 10) {
+        alert("Вы не можете загружать больше 10 файлов");
+        uploadInput.files = validFiles.files; // поставили пустое значение
+        return;
+      }
+      arFiles.value.length = 0;
+      for (const file of event.files) {
+        if (isValidFile(file)) {
+          validFiles.items.add(file);
+          validSize += file.size
+          arFiles.value.push(file);         
+        }
+      }      
+      uploadInput.files = validFiles.files;  
 
-    // inputFile.files = event.target.files
-  } else {
-    console.log('fuck')
+      for (const child of document.querySelector('.quiz-form__form-file-block').children) {
+        child.style.pointerEvents = "auto";
+      }
+    } else {
+      console.log('error when drop')
+    }
   }
+  // starts when change
+  else {
+    if (event.target.files.length > 0) {
+      if (event.target.files.length > 10) {
+        alert("Вы не можете загружать больше 10 файлов");
+        uploadInput.files = validFiles.files; // поставили пустое значение
+        return;
+      }
+      arFiles.value.length = 0;
+      for (const file of event.target.files) {
+        if (isValidFile(file)) {
+          validFiles.items.add(file);
+          validSize += file.size
+          arFiles.value.push(file);          
+        }
+      }
+      uploadInput.files = validFiles.files;   
+
+      for (const child of document.querySelector('.quiz-form__form-file-block').children) {
+        child.style.pointerEvents = "auto";
+      }
+    } else {
+      console.log('error change')
+    }
+  }
+  var sizeFormat = new Array('Байт', 'КБ', 'МБ', 'ГБ'),  i=0;
+  while(validSize>900){validSize/=1024;i++;}
+  size = (Math.round(validSize*100)/100)+' '+sizeFormat[i];
 }
 
 const generateThumbnail = (file) => {
@@ -132,14 +164,25 @@ const generateThumbnail = (file) => {
 }
 
 function remove(i) {
-  files.value.splice(i, 1);
-  console.log('prev', inputFile.files)
-  inputFile.files = files.value;
-  console.log('after', inputFile.files)
+  let validFiles = new DataTransfer();
+  let uploadInput = document.querySelector('#quiz-form__form-file')
+  let validSize = 0;
+  arFiles.value.splice(i, 1);
+  for (const file of arFiles._rawValue) {
+    if (isValidFile(file)) {
+      validFiles.items.add(file);
+      validSize += file.size
+    }
+  }
+  uploadInput.files = validFiles.files;
+  var sizeFormat = new Array('Байт', 'КБ', 'МБ', 'ГБ'),  i=0;
+  while(validSize>900){validSize/=1024;i++;}
+  size = (Math.round(validSize*100)/100)+' '+sizeFormat[i];
 }
 
 const removeAll = () => {
-  files.value.length = 0
+  arFiles.value.length = 0
+  document.querySelector('#quiz-form__form-file').value = ''
 }
 
 const dragover = (e) => {
@@ -167,18 +210,43 @@ const dragenter = () => {
 
 const drop = (e) => {
   e.preventDefault();
-  // 
+  const filesArr = e.dataTransfer.files;
+  let validFiles = new DataTransfer();
 
-
-
-  const customEvent  = { target: e.dataTransfer }
-  console.log(e)
+  for (const file of filesArr) {
+    if (isValidFile(file)) {
+      validFiles.items.add(file);
+    }
+  }
+  
   for (const child of document.querySelector('.quiz-form__form-file-block').children) {
     child.style.pointerEvents = "auto";
   }
   DropActive.value = false;
-  console.log('drop', customEvent)
-  onChange(customEvent);
+  onChange(validFiles);
+}
+
+
+function isValidFile(file) {
+  const allowedTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'application/pdf',
+  ];
+
+  if (file.size > 20 * 1024 * 1024) {
+    alert(file.name + ' слишком большой. Максимальный размер 20МБ!')
+    return false;
+  }
+
+  if (!allowedTypes.includes(file.type)) {
+    alert(file.name + ' имеет неподдерживаемый тип!')
+    return false;
+  }
+
+  return true;
 }
 
 
@@ -300,14 +368,14 @@ const SendForm = (e)  => {
           </a>        
           <div class="quiz-form__form-file-block" v-bind:class="{_active: DropActive}" id="file-enter-zone" @dragover="dragover" @dragleave="dragleave" @drop="drop" @dragenter="dragenter" @dragover.prevent @dragenter.prevent>
             <div class="quiz-file-preview-info">
-              <span id="quiz-file-count" v-if="files.length"></span>
-              <span id="quiz-file-size" v-if="files.length">{{ files.length }} файла</span>
-              <button @click="removeAll" type="button" id="quiz-file-remove-all" v-if="files.length"> Удалить все</button>
+              <span id="quiz-file-count" v-if="arFiles.length">{{ size }}</span>
+              <span id="quiz-file-size" v-if="arFiles.length">{{ arFiles.length }} файла</span>
+              <button @click="removeAll" type="button" id="quiz-file-remove-all" v-if="arFiles.length"> Удалить все</button>
             </div>
             <div class="preview" id="quiz-file-preview">                    
-              <div v-for="(file, index) in files" :key="file.name" :data-id="index" class="quiz-file__preview-img" >
+              <div v-for="(file, index) in arFiles" :key="file.name" :data-id="index" class="quiz-file__preview-img" >
                 <img :src="generateThumbnail(file)" style="display: block;">
-                <button class="quiz-file__preview-close" type="button" @click="remove(files.indexOf(file))">
+                <button class="quiz-file__preview-close" type="button" @click="remove(arFiles.indexOf(file))">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <g clip-path="url(#clip0_319_6585)">
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M7 0C10.8654 0 14 3.13462 14 7C14 10.8654 10.8654 14 7 14C3.13462 14 0 10.8654 0 7C0 3.13462 3.13462 0 7 0ZM3.46197 9.53372L5.99569 7L3.46197 4.46628C3.31662 4.32087 3.31662 4.0837 3.46197 3.93835L3.93835 3.46197C4.0837 3.31662 4.32087 3.31662 4.46628 3.46197L7 5.99569L9.53372 3.46197C9.67913 3.31662 9.9163 3.31662 10.0616 3.46197L10.538 3.93835C10.6834 4.0837 10.6834 4.32087 10.538 4.46628L8.00431 7L10.538 9.53372C10.6834 9.67913 10.6834 9.9163 10.538 10.0616L10.0616 10.538C9.9163 10.6834 9.67913 10.6834 9.53372 10.538L7 8.00431L4.46628 10.538C4.32087 10.6834 4.0837 10.6834 3.93835 10.538L3.46197 10.0616C3.31662 9.9163 3.31662 9.67913 3.46197 9.53372Z" fill="#F5F5F2"></path>
@@ -322,7 +390,7 @@ const SendForm = (e)  => {
               </div>
             </div>
             <label for="quiz-form__form-file" class="btn-white">Добавить фото
-              <input type="file" @change="onChange" multiple class="quiz-form__form-file" id="quiz-form__form-file" name="file" accept="image/*" aria-describedby="hint" ref="inputFile">
+              <input type="file" @change="onChange" multiple class="quiz-form__form-file" id="quiz-form__form-file" name="file" aria-describedby="hint">
             </label>            
           </div>
           <div class="custom-cuptha">
@@ -987,7 +1055,7 @@ h2.question{
   width: 100%;
 }
 span#quiz-file-count {
-color: var(--dark);
+color: #2A333E;
 font-size: 14px;
 font-weight: 500;
 line-height: 160%;
