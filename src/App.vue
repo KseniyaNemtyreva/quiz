@@ -390,7 +390,7 @@ const SendForm = (e)  => {
               </div>
             </div>
             <label for="quiz-form__form-file" class="btn-white">Добавить фото
-              <input type="file" @change="onChange" multiple class="quiz-form__form-file" id="quiz-form__form-file" name="file" aria-describedby="hint">
+              <input type="file" @change="onChange" multiple class="quiz-form__form-file" id="quiz-form__form-file" name="file[]" aria-describedby="hint">
             </label>            
           </div>
           <div class="custom-cuptha">
